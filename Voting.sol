@@ -16,10 +16,15 @@ contract Voting {
 
     address private chairPerson;
 
+    uint private deployDate;
+    uint private votingDays = 30; // 30 days by default
+    uint private validUntil;
+
     Candidate[] candidates;
     mapping(address => Voter) voters;
 
-    constructor(string[] memory candidatesNames) {
+    constructor(string[] memory candidatesNames, uint _votingDays) {
+        require(_votingDays > 0, "Voting days must be positive");
         for (uint i = 0; i < candidatesNames.length; i++) {
             candidates.push(Candidate({
                 name: candidatesNames[i],
@@ -30,6 +35,12 @@ contract Voting {
 
         chairPerson = msg.sender;
         voters[chairPerson].voted = false;
+
+        // declare the voting time
+        votingDays = _votingDays;
+        deployDate = block.timestamp;
+        validUntil = deployDate + votingDays * 24 * 60 * 60 * 1000;
+
     }
 
     // helper method
@@ -44,6 +55,8 @@ contract Voting {
 
     function vote(uint256 candidateIndex) public {
         require(candidateIndex <= max(0, candidatesCount-1), "Invalid index");
+        require(!voters[msg.sender].voted, "You already voted");
+        require(block.timestamp <= validUntil, "Voting has closed");
         Voter storage sender = voters[msg.sender];
         sender.voted = true;
         sender.vote = candidateIndex;
