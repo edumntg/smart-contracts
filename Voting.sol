@@ -39,7 +39,7 @@ contract Voting {
         // declare the voting time
         votingDays = _votingDays;
         deployDate = block.timestamp;
-        validUntil = deployDate + votingDays * 24 * 60 * 60 * 1000;
+        validUntil = deployDate + votingDays * 24 * 60 * 60;
 
     }
 
